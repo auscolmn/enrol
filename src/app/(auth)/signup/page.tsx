@@ -33,13 +33,20 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+    
+    // If email confirmation is disabled, user is auto-confirmed
+    if (data?.user && !data.user.identities?.length) {
+      setError('An account with this email already exists');
+      setLoading(false);
+      return;
+    }
 
     if (error) {
       setError(error.message);
