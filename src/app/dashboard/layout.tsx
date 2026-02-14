@@ -15,6 +15,9 @@ export default async function DashboardLayout({
     redirect('/login');
   }
 
+  // Redirect /dashboard to /dashboard/pipeline
+  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
