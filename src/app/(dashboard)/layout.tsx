@@ -23,7 +23,7 @@ export default async function DashboardLayout({
           {/* Logo */}
           <div className="h-16 flex items-center px-6 border-b border-gray-200">
             <Link href="/dashboard/pipeline" className="text-xl font-bold text-gray-900">
-              Enrol
+              Enrol<span className="text-blue-600">Studio</span>
             </Link>
           </div>
 

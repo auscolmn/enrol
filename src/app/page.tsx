@@ -19,7 +19,7 @@ export default async function HomePage() {
       {/* Header */}
       <header className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">Enrol</div>
+          <div className="text-2xl font-bold text-gray-900">Enrol<span className="text-blue-600">Studio</span></div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-gray-600 hover:text-gray-900">
               Sign in

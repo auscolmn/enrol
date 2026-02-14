@@ -66,7 +66,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription>Start managing your applicants with Enrol</CardDescription>
+          <CardDescription>Start managing your applicants with EnrolStudio</CardDescription>
         </CardHeader>
         <form onSubmit={handleSignup}>
           <CardContent className="space-y-4">
