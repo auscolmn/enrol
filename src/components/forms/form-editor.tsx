@@ -61,7 +61,7 @@ export function FormEditor({ initialForm }: FormEditorProps) {
   };
 
   const updateField = (id: string, updates: Partial<FormField>) => {
-    setFields(fields.map(f => f.id === id ? { ...f, ...updates } : f));
+    setFields(fields.map(f => f.id === id ? { ...f, ...updates } as FormField : f));
   };
 
   const removeField = (id: string) => {
