@@ -10,12 +10,19 @@ function getResendClient() {
   return resend;
 }
 
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+}
+
 interface NewSubmissionEmailProps {
   to: string;
   applicantName: string;
   applicantEmail: string;
   formTitle: string;
   formData: Record<string, string>;
+  formFields?: FormField[];
   viewUrl: string;
 }
 
@@ -25,6 +32,7 @@ export async function sendNewSubmissionEmail({
   applicantEmail,
   formTitle,
   formData,
+  formFields = [],
   viewUrl,
 }: NewSubmissionEmailProps) {
   // Skip if no API key configured
@@ -34,9 +42,20 @@ export async function sendNewSubmissionEmail({
     return null;
   }
 
-  const formDataHtml = Object.entries(formData)
-    .map(([key, value]) => `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">${key}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${value || '—'}</td></tr>`)
-    .join('');
+  // Build form data HTML with proper labels
+  let formDataHtml: string;
+  if (formFields.length > 0) {
+    // Use field labels in form order
+    formDataHtml = formFields
+      .filter(field => formData[field.id] !== undefined)
+      .map(field => `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">${field.label}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${formData[field.id] || '—'}</td></tr>`)
+      .join('');
+  } else {
+    // Fallback to raw keys
+    formDataHtml = Object.entries(formData)
+      .map(([key, value]) => `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">${key}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${value || '—'}</td></tr>`)
+      .join('');
+  }
 
   try {
     const { data, error } = await client.emails.send({

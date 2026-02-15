@@ -20,12 +20,12 @@ import { ApplicantCard } from './applicant-card';
 import { ApplicantModal } from './applicant-modal';
 import { Card } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
-import type { PipelineStage, Submission } from '@/types';
+import type { PipelineStage, Submission, FormField } from '@/types';
 
 interface PipelineBoardProps {
   stages: PipelineStage[];
   submissions: Submission[];
-  forms: { id: string; title: string }[];
+  forms: { id: string; title: string; fields: FormField[] }[];
 }
 
 export function PipelineBoard({ stages, submissions: initialSubmissions, forms }: PipelineBoardProps) {
@@ -179,6 +179,7 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms }
         <ApplicantModal
           submission={selectedSubmission}
           stages={stages}
+          formFields={forms.find(f => f.id === selectedSubmission.form_id)?.fields || []}
           onClose={() => setSelectedSubmission(null)}
           onUpdate={(updated) => {
             setSubmissions(submissions.map(s => s.id === updated.id ? updated : s));

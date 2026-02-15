@@ -14,10 +14,10 @@ export default async function PipelinePage() {
     .eq('owner_id', user?.id)
     .single();
 
-  // Get all forms for this workspace
+  // Get all forms for this workspace (including fields for label lookup)
   const { data: forms } = await supabase
     .from('forms')
-    .select('id, title')
+    .select('id, title, fields')
     .eq('workspace_id', workspace?.id);
 
   // Get all pipeline stages for these forms

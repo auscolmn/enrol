@@ -14,16 +14,17 @@ import {
 } from '@/components/ui/dialog';
 import { formatDistanceToNow, format } from 'date-fns';
 import { X, Mail, Phone, Calendar, Clock, Save, FileText } from 'lucide-react';
-import type { PipelineStage, Submission, StageHistory } from '@/types';
+import type { PipelineStage, Submission, StageHistory, FormField } from '@/types';
 
 interface ApplicantModalProps {
   submission: Submission;
   stages: PipelineStage[];
+  formFields: FormField[];
   onClose: () => void;
   onUpdate: (submission: Submission) => void;
 }
 
-export function ApplicantModal({ submission, stages, onClose, onUpdate }: ApplicantModalProps) {
+export function ApplicantModal({ submission, stages, formFields, onClose, onUpdate }: ApplicantModalProps) {
   const [notes, setNotes] = useState(submission.notes || '');
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<StageHistory[]>([]);
@@ -162,12 +163,29 @@ export function ApplicantModal({ submission, stages, onClose, onUpdate }: Applic
             </label>
             <Card className="p-4">
               <dl className="space-y-3">
-                {Object.entries(formData).map(([key, value]) => (
-                  <div key={key} className="grid grid-cols-3 gap-2">
-                    <dt className="text-sm text-gray-500 truncate">{key}</dt>
-                    <dd className="text-sm text-gray-900 col-span-2">{String(value) || '—'}</dd>
-                  </div>
-                ))}
+                {formFields.length > 0 ? (
+                  // Show fields in form order with proper labels
+                  formFields.map((field) => {
+                    const value = formData[field.id];
+                    if (value === undefined) return null;
+                    return (
+                      <div key={field.id} className="grid grid-cols-3 gap-2">
+                        <dt className="text-sm text-gray-500">{field.label}</dt>
+                        <dd className="text-sm text-gray-900 col-span-2 whitespace-pre-wrap">
+                          {String(value) || '—'}
+                        </dd>
+                      </div>
+                    );
+                  })
+                ) : (
+                  // Fallback: show raw keys if no field definitions
+                  Object.entries(formData).map(([key, value]) => (
+                    <div key={key} className="grid grid-cols-3 gap-2">
+                      <dt className="text-sm text-gray-500 truncate">{key}</dt>
+                      <dd className="text-sm text-gray-900 col-span-2">{String(value) || '—'}</dd>
+                    </div>
+                  ))
+                )}
               </dl>
             </Card>
           </div>

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ApplicantModal } from '@/components/pipeline/applicant-modal';
 import { format } from 'date-fns';
 import { Search, ChevronDown, Mail, Calendar, Filter } from 'lucide-react';
-import type { PipelineStage, Submission } from '@/types';
+import type { PipelineStage, Submission, FormField } from '@/types';
 
 interface EnrichedSubmission extends Omit<Submission, 'stage'> {
   formTitle: string;
@@ -20,9 +20,10 @@ interface EnrichedSubmission extends Omit<Submission, 'stage'> {
 interface ApplicantsTableProps {
   submissions: EnrichedSubmission[];
   stages: PipelineStage[];
+  forms: { id: string; title: string; fields: FormField[] }[];
 }
 
-export function ApplicantsTable({ submissions: initialSubmissions, stages }: ApplicantsTableProps) {
+export function ApplicantsTable({ submissions: initialSubmissions, stages, forms }: ApplicantsTableProps) {
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
@@ -197,6 +198,7 @@ export function ApplicantsTable({ submissions: initialSubmissions, stages }: App
         <ApplicantModal
           submission={selectedSubmission as unknown as Submission}
           stages={stages.filter(s => s.form_id === selectedSubmission.form_id)}
+          formFields={forms.find(f => f.id === selectedSubmission.form_id)?.fields || []}
           onClose={() => setSelectedSubmission(null)}
           onUpdate={handleUpdate}
         />

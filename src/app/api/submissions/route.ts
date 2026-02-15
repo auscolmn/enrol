@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: submitError.message }, { status: 500 });
     }
 
-    // Get form details for notification
+    // Get form details for notification (including fields for labels)
     const { data: form } = await supabase
       .from('forms')
-      .select('title, workspace_id')
+      .select('title, workspace_id, fields')
       .eq('id', form_id)
       .single();
 
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
             applicantEmail: email || '',
             formTitle: form.title,
             formData: data,
+            formFields: form.fields || [],
             viewUrl: `${appUrl}/dashboard/pipeline`,
           });
         }
