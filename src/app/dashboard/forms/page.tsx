@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, ExternalLink, MoreVertical } from 'lucide-react';
+import { Plus, FileText } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { FormCardActions } from '@/components/forms/form-card-actions';
 
 export default async function FormsPage() {
   const supabase = await createClient();
@@ -46,26 +47,29 @@ export default async function FormsPage() {
       {forms && forms.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {forms.map((form) => (
-            <Link key={form.id} href={`/dashboard/forms/${form.id}`}>
-              <Card className="p-5 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                  </div>
+            <Card key={form.id} className="p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <Link href={`/dashboard/forms/${form.id}`} className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center hover:bg-blue-200 transition-colors">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                </Link>
+                <div className="flex items-center gap-2">
                   <Badge variant={form.published ? 'default' : 'secondary'}>
                     {form.published ? 'Live' : 'Draft'}
                   </Badge>
+                  {form.published && <FormCardActions slug={form.slug} />}
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{form.title}</h3>
-                <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                  {form.description || 'No description'}
-                </p>
-                <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span>{form.fields?.length || 0} fields</span>
-                  <span>{formatDistanceToNow(new Date(form.created_at), { addSuffix: true })}</span>
-                </div>
-              </Card>
-            </Link>
+              </div>
+              <Link href={`/dashboard/forms/${form.id}`}>
+                <h3 className="font-semibold text-gray-900 mb-1 hover:text-blue-600">{form.title}</h3>
+              </Link>
+              <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                {form.description || 'No description'}
+              </p>
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span>{form.fields?.length || 0} fields</span>
+                <span>{formatDistanceToNow(new Date(form.created_at), { addSuffix: true })}</span>
+              </div>
+            </Card>
           ))}
         </div>
       ) : (
