@@ -40,17 +40,23 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
         f.label.toLowerCase().includes('name') && f.type === 'text'
       );
 
-      const { error: submitError } = await supabase
-        .from('submissions')
-        .insert({
+      // Submit via API (handles email notification)
+      const response = await fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           form_id: form.id,
           stage_id: firstStageId,
           data: formData,
           email: emailField ? formData[emailField.id] : null,
           name: nameField ? formData[nameField.id] : null,
-        });
+        }),
+      });
 
-      if (submitError) throw submitError;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit');
+      }
 
       setSubmitted(true);
     } catch (err) {
