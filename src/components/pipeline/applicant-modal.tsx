@@ -101,7 +101,7 @@ export function ApplicantModal({ submission, stages, formFields, onClose, onUpda
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <span>{submission.name || submission.email || 'Applicant'}</span>
@@ -133,14 +133,14 @@ export function ApplicantModal({ submission, stages, formFields, onClose, onUpda
           {/* Stage Selector */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {stages.map((stage) => (
                 <button
                   key={stage.id}
                   onClick={() => changeStage(stage.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                     stage.id === submission.stage_id
-                      ? 'ring-2 ring-offset-2'
+                      ? 'ring-2 ring-offset-1 sm:ring-offset-2'
                       : 'opacity-60 hover:opacity-100'
                   }`}
                   style={{ 

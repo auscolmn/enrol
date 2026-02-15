@@ -18,15 +18,15 @@ export function StageColumn({ stage, submissions, onCardClick }: StageColumnProp
   });
 
   return (
-    <div className="flex-shrink-0 w-72">
+    <div className="flex-shrink-0 w-64 sm:w-72 snap-start">
       {/* Stage Header */}
       <div className="flex items-center gap-2 mb-3 px-1">
         <div
-          className="w-3 h-3 rounded-full"
+          className="w-3 h-3 rounded-full flex-shrink-0"
           style={{ backgroundColor: stage.color }}
         />
-        <h3 className="font-medium text-gray-900">{stage.name}</h3>
-        <Badge variant="secondary" className="ml-auto">
+        <h3 className="font-medium text-gray-900 truncate">{stage.name}</h3>
+        <Badge variant="secondary" className="ml-auto flex-shrink-0">
           {submissions.length}
         </Badge>
       </div>
@@ -34,7 +34,7 @@ export function StageColumn({ stage, submissions, onCardClick }: StageColumnProp
       {/* Stage Column */}
       <div
         ref={setNodeRef}
-        className={`bg-gray-100 rounded-lg p-3 min-h-[500px] space-y-3 transition-colors ${
+        className={`bg-gray-100 rounded-lg p-2 sm:p-3 min-h-[400px] sm:min-h-[500px] space-y-2 sm:space-y-3 transition-colors ${
           isOver ? 'bg-blue-50 ring-2 ring-blue-300' : ''
         }`}
       >

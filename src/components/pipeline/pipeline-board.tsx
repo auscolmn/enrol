@@ -142,7 +142,9 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms }
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Pipeline</h1>
         <p className="text-gray-600">
-          {submissions.length} applicant{submissions.length !== 1 ? 's' : ''} • Drag cards to update status
+          {submissions.length} applicant{submissions.length !== 1 ? 's' : ''}
+          <span className="hidden sm:inline"> • Drag cards to update status</span>
+          <span className="sm:hidden"> • Tap to view, swipe to scroll</span>
         </p>
       </div>
 
@@ -153,7 +155,8 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms }
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:snap-none">
           {stages.map((stage) => {
             const stageSubmissions = submissions.filter(s => s.stage_id === stage.id);
             return (
@@ -165,6 +168,7 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms }
               />
             );
           })}
+          </div>
         </div>
 
         <DragOverlay>
