@@ -21,7 +21,10 @@ import {
   Mail,
   Phone,
   List,
-  Upload
+  Upload,
+  Copy,
+  Check,
+  Link as LinkIcon
 } from 'lucide-react';
 import type { Form, FormField, FieldType } from '@/types';
 
@@ -43,8 +46,19 @@ export function FormEditor({ initialForm }: FormEditorProps) {
   const [fields, setFields] = useState<FormField[]>(initialForm.fields || []);
   const [saving, setSaving] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  const publicUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/f/${form.slug}`
+    : `/f/${form.slug}`;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(publicUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const addField = (type: FieldType) => {
     const newField: FormField = {
@@ -93,9 +107,6 @@ export function FormEditor({ initialForm }: FormEditorProps) {
   };
 
   const selectedField = fields.find(f => f.id === selectedFieldId);
-  const publicUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/f/${form.slug}`
-    : `/f/${form.slug}`;
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
@@ -116,6 +127,21 @@ export function FormEditor({ initialForm }: FormEditorProps) {
               </Badge>
               <span>{fields.length} fields</span>
             </div>
+            {form.published && (
+              <div className="flex items-center gap-2 mt-1">
+                <LinkIcon className="w-3 h-3 text-gray-400" />
+                <code className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                  {publicUrl}
+                </code>
+                <button
+                  onClick={copyLink}
+                  className="text-gray-400 hover:text-gray-600"
+                  title="Copy link"
+                >
+                  {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
