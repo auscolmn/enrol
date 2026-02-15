@@ -50,13 +50,14 @@ export type FormField = TextField | TextareaField | EmailField | PhoneField | Se
 // Pipeline Stages
 export interface PipelineStage {
   id: string;
+  form_id: string;
   name: string;
   slug: string;
   color: string;
   position: number;
 }
 
-export const DEFAULT_STAGES: Omit<PipelineStage, 'id'>[] = [
+export const DEFAULT_STAGES: Omit<PipelineStage, 'id' | 'form_id'>[] = [
   { name: 'New', slug: 'new', color: '#6B7280', position: 0 },
   { name: 'Reviewing', slug: 'reviewing', color: '#F59E0B', position: 1 },
   { name: 'Accepted', slug: 'accepted', color: '#10B981', position: 2 },
