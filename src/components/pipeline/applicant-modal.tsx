@@ -13,37 +13,51 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatDistanceToNow, format } from 'date-fns';
-import { X, Mail, Phone, Calendar, Clock, Save, FileText } from 'lucide-react';
-import type { PipelineStage, Submission, StageHistory, FormField } from '@/types';
+import { X, Mail, Phone, Calendar, Clock, Save, FileText, Tag } from 'lucide-react';
+import { TagManager } from '@/components/tags/tag-manager';
+import type { PipelineStage, Submission, StageHistory, FormField, Tag as TagType } from '@/types';
 
 interface ApplicantModalProps {
   submission: Submission;
   stages: PipelineStage[];
   formFields: FormField[];
+  workspaceId: string;
   onClose: () => void;
   onUpdate: (submission: Submission) => void;
 }
 
-export function ApplicantModal({ submission, stages, formFields, onClose, onUpdate }: ApplicantModalProps) {
+export function ApplicantModal({ submission, stages, formFields, workspaceId, onClose, onUpdate }: ApplicantModalProps) {
   const [notes, setNotes] = useState(submission.notes || '');
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<StageHistory[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
   const supabase = createClient();
 
   const currentStage = stages.find(s => s.id === submission.stage_id);
 
-  // Fetch stage history
+  // Fetch stage history and tags
   useEffect(() => {
-    async function fetchHistory() {
-      const { data } = await supabase
+    async function fetchData() {
+      // Fetch history
+      const { data: historyData } = await supabase
         .from('stage_history')
         .select('*, from_stage:pipeline_stages!from_stage_id(name, color), to_stage:pipeline_stages!to_stage_id(name, color)')
         .eq('submission_id', submission.id)
         .order('changed_at', { ascending: false });
       
-      if (data) setHistory(data);
+      if (historyData) setHistory(historyData);
+
+      // Fetch tags
+      const { data: tagData } = await supabase
+        .from('submission_tags')
+        .select('*, tag:tags(*)')
+        .eq('submission_id', submission.id);
+      
+      if (tagData) {
+        setTags(tagData.map(st => st.tag).filter(Boolean) as TagType[]);
+      }
     }
-    fetchHistory();
+    fetchData();
   }, [submission.id, supabase]);
 
   const saveNotes = async () => {
@@ -153,6 +167,20 @@ export function ApplicantModal({ submission, stages, formFields, onClose, onUpda
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              Tags
+            </label>
+            <TagManager
+              submissionId={submission.id}
+              workspaceId={workspaceId}
+              initialTags={tags}
+              onTagsChange={setTags}
+            />
           </div>
 
           {/* Application Data */}

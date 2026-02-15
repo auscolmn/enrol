@@ -44,6 +44,7 @@ export default async function PipelinePage() {
       stages={defaultStages}
       submissions={submissions || []}
       forms={forms || []}
+      workspaceId={workspace?.id || ''}
     />
   );
 }

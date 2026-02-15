@@ -78,6 +78,7 @@ export default async function ApplicantsPage() {
         submissions={enrichedSubmissions} 
         stages={stages || []}
         forms={forms || []}
+        workspaceId={workspace?.id || ''}
       />
     </div>
   );

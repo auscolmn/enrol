@@ -21,9 +21,10 @@ interface ApplicantsTableProps {
   submissions: EnrichedSubmission[];
   stages: PipelineStage[];
   forms: { id: string; title: string; fields: FormField[] }[];
+  workspaceId: string;
 }
 
-export function ApplicantsTable({ submissions: initialSubmissions, stages, forms }: ApplicantsTableProps) {
+export function ApplicantsTable({ submissions: initialSubmissions, stages, forms, workspaceId }: ApplicantsTableProps) {
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
@@ -199,6 +200,7 @@ export function ApplicantsTable({ submissions: initialSubmissions, stages, forms
           submission={selectedSubmission as unknown as Submission}
           stages={stages.filter(s => s.form_id === selectedSubmission.form_id)}
           formFields={forms.find(f => f.id === selectedSubmission.form_id)?.fields || []}
+          workspaceId={workspaceId}
           onClose={() => setSelectedSubmission(null)}
           onUpdate={handleUpdate}
         />

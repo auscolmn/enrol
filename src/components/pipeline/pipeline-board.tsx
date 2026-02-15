@@ -26,9 +26,10 @@ interface PipelineBoardProps {
   stages: PipelineStage[];
   submissions: Submission[];
   forms: { id: string; title: string; fields: FormField[] }[];
+  workspaceId: string;
 }
 
-export function PipelineBoard({ stages, submissions: initialSubmissions, forms }: PipelineBoardProps) {
+export function PipelineBoard({ stages, submissions: initialSubmissions, forms, workspaceId }: PipelineBoardProps) {
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
@@ -184,6 +185,7 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms }
           submission={selectedSubmission}
           stages={stages}
           formFields={forms.find(f => f.id === selectedSubmission.form_id)?.fields || []}
+          workspaceId={workspaceId}
           onClose={() => setSelectedSubmission(null)}
           onUpdate={(updated) => {
             setSubmissions(submissions.map(s => s.id === updated.id ? updated : s));

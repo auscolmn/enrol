@@ -129,3 +129,20 @@ export interface User {
   email: string;
   created_at: string;
 }
+
+// Tags
+export interface Tag {
+  id: string;
+  workspace_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+export interface SubmissionTag {
+  id: string;
+  submission_id: string;
+  tag_id: string;
+  created_at: string;
+  tag?: Tag;
+}
