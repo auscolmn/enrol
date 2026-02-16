@@ -47,8 +47,6 @@ export default async function HomePage() {
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-[#1E1B4B] mb-6 leading-tight">
             Application forms + student pipeline.
-            <br />
-            <span className="text-[#818CF8]">That&apos;s it.</span>
           </h1>
           <p className="text-xl text-[#1E1B4B]/60 mb-8">
             Stop paying for features you don&apos;t use. Simple tools for people who train people.
