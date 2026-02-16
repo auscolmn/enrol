@@ -7,12 +7,42 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-import type { Form, FormField } from '@/types';
+import type { Form, FormField, FormBranding } from '@/types';
 
 interface PublicFormProps {
   form: Form;
   firstStageId?: string;
 }
+
+const DEFAULT_BRANDING: FormBranding = {
+  primaryColor: '#3B82F6',
+  backgroundColor: '#F9FAFB',
+  cardBackground: '#FFFFFF',
+  fontFamily: 'inter',
+  borderRadius: 'rounded',
+  submitButtonText: 'Submit Application',
+  hideEnrolBranding: false,
+};
+
+// Helper functions for branding
+const getBorderRadiusValue = (radius: string | undefined) => {
+  switch (radius) {
+    case 'sharp': return '0px';
+    case 'pill': return '9999px';
+    default: return '8px';
+  }
+};
+
+const getFontFamilyStyle = (font: string | undefined): React.CSSProperties => {
+  switch (font) {
+    case 'plus-jakarta':
+      return { fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif' };
+    case 'system':
+      return { fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif' };
+    default: // inter
+      return { fontFamily: '"Inter", system-ui, sans-serif' };
+  }
+};
 
 export function PublicForm({ form, firstStageId }: PublicFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -20,6 +50,11 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+
+  const branding: FormBranding = {
+    ...DEFAULT_BRANDING,
+    ...form.settings?.branding,
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +93,12 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
         throw new Error(error.error || 'Failed to submit');
       }
 
+      // Handle redirect if configured
+      if (form.settings?.redirectUrl) {
+        window.location.href = form.settings.redirectUrl;
+        return;
+      }
+
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit');
@@ -72,15 +113,48 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
 
   // Success state
   if (submitted) {
+    const confirmationMessage = form.settings?.confirmationMessage || 
+      "Thank you for your application. We'll review it and get back to you soon.";
+    
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+      <div 
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ 
+          backgroundColor: branding.backgroundColor,
+          ...getFontFamilyStyle(branding.fontFamily),
+        }}
+      >
+        <Card 
+          className="max-w-md w-full p-8 text-center"
+          style={{ 
+            backgroundColor: branding.cardBackground,
+            borderRadius: getBorderRadiusValue(branding.borderRadius),
+          }}
+        >
+          {branding.logoUrl && (
+            <div className="flex justify-center mb-6">
+              <img 
+                src={branding.logoUrl} 
+                alt="Logo" 
+                className="max-h-12 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: `${branding.primaryColor}20` }}
+          >
+            <CheckCircle 
+              className="w-8 h-8" 
+              style={{ color: branding.primaryColor }}
+            />
           </div>
           <h2 className="text-2xl font-semibold mb-2">Application Submitted!</h2>
           <p className="text-gray-600">
-            Thank you for your application. We'll review it and get back to you soon.
+            {confirmationMessage}
           </p>
         </Card>
       </div>
@@ -90,7 +164,13 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
   // Not published warning
   if (!form.published) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div 
+        className="min-h-screen p-4"
+        style={{ 
+          backgroundColor: branding.backgroundColor,
+          ...getFontFamilyStyle(branding.fontFamily),
+        }}
+      >
         <div className="max-w-xl mx-auto">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
@@ -108,6 +188,7 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
             handleSubmit={handleSubmit}
             submitting={submitting}
             error={error}
+            branding={branding}
           />
         </div>
       </div>
@@ -115,8 +196,27 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div 
+      className="min-h-screen p-4"
+      style={{ 
+        backgroundColor: branding.backgroundColor,
+        ...getFontFamilyStyle(branding.fontFamily),
+      }}
+    >
       <div className="max-w-xl mx-auto">
+        {/* Logo */}
+        {branding.logoUrl && (
+          <div className="flex justify-center mb-6 pt-4">
+            <img 
+              src={branding.logoUrl} 
+              alt="Logo" 
+              className="max-h-16 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
         <FormContent 
           form={form}
           formData={formData}
@@ -124,6 +224,7 @@ export function PublicForm({ form, firstStageId }: PublicFormProps) {
           handleSubmit={handleSubmit}
           submitting={submitting}
           error={error}
+          branding={branding}
         />
       </div>
     </div>
@@ -137,11 +238,21 @@ interface FormContentProps {
   handleSubmit: (e: React.FormEvent) => void;
   submitting: boolean;
   error: string | null;
+  branding: FormBranding;
 }
 
-function FormContent({ form, formData, updateField, handleSubmit, submitting, error }: FormContentProps) {
+function FormContent({ form, formData, updateField, handleSubmit, submitting, error, branding }: FormContentProps) {
+  const borderRadius = getBorderRadiusValue(branding.borderRadius);
+  const inputBorderRadius = branding.borderRadius === 'pill' ? '9999px' : borderRadius;
+  
   return (
-    <Card className="p-6 md:p-8">
+    <Card 
+      className="p-6 md:p-8"
+      style={{ 
+        backgroundColor: branding.cardBackground,
+        borderRadius: borderRadius,
+      }}
+    >
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{form.title}</h1>
         {form.description && (
@@ -151,7 +262,10 @@ function FormContent({ form, formData, updateField, handleSubmit, submitting, er
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md flex items-center gap-2">
+          <div 
+            className="p-3 text-sm text-red-600 bg-red-50 flex items-center gap-2"
+            style={{ borderRadius: inputBorderRadius }}
+          >
             <AlertCircle className="w-4 h-4" />
             {error}
           </div>
@@ -172,6 +286,7 @@ function FormContent({ form, formData, updateField, handleSubmit, submitting, er
                 onChange={(e) => updateField(field.id, e.target.value)}
                 required={field.required}
                 rows={4}
+                style={{ borderRadius: inputBorderRadius }}
               />
             ) : field.type === 'select' && 'options' in field ? (
               <select
@@ -179,7 +294,11 @@ function FormContent({ form, formData, updateField, handleSubmit, submitting, er
                 value={formData[field.id] || ''}
                 onChange={(e) => updateField(field.id, e.target.value)}
                 required={field.required}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                className="w-full h-10 px-3 border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-offset-0"
+                style={{ 
+                  borderRadius: inputBorderRadius,
+                  outlineColor: branding.primaryColor,
+                }}
               >
                 <option value="">Select an option...</option>
                 {field.options?.map((opt) => (
@@ -196,6 +315,7 @@ function FormContent({ form, formData, updateField, handleSubmit, submitting, er
                 value={formData[field.id] || ''}
                 onChange={(e) => updateField(field.id, e.target.value)}
                 required={field.required}
+                style={{ borderRadius: inputBorderRadius }}
               />
             )}
 
@@ -205,14 +325,24 @@ function FormContent({ form, formData, updateField, handleSubmit, submitting, er
           </div>
         ))}
 
-        <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting ? 'Submitting...' : 'Submit Application'}
-        </Button>
+        <button 
+          type="submit" 
+          className="w-full py-2.5 px-4 text-white font-medium transition-colors disabled:opacity-50"
+          disabled={submitting}
+          style={{ 
+            backgroundColor: branding.primaryColor,
+            borderRadius: inputBorderRadius,
+          }}
+        >
+          {submitting ? 'Submitting...' : (branding.submitButtonText || 'Submit Application')}
+        </button>
       </form>
 
-      <p className="text-center text-xs text-gray-400 mt-6">
-        Powered by EnrolStudio
-      </p>
+      {!branding.hideEnrolBranding && (
+        <p className="text-center text-xs text-gray-400 mt-6">
+          Powered by EnrolStudio
+        </p>
+      )}
     </Card>
   );
 }

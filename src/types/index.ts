@@ -78,10 +78,22 @@ export interface Form {
   updated_at: string;
 }
 
+export interface FormBranding {
+  logoUrl?: string;
+  primaryColor?: string;        // hex, default #3B82F6
+  backgroundColor?: string;     // hex, default #F9FAFB
+  cardBackground?: string;      // hex, default #FFFFFF
+  fontFamily?: 'inter' | 'plus-jakarta' | 'system';
+  borderRadius?: 'sharp' | 'rounded' | 'pill';  // 0, 8px, 9999px
+  submitButtonText?: string;    // default "Submit Application"
+  hideEnrolBranding?: boolean;  // premium feature
+}
+
 export interface FormSettings {
   confirmationMessage?: string;
   notifyEmail?: string;
   redirectUrl?: string;
+  branding?: FormBranding;
 }
 
 // Submission (Applicant)
@@ -145,4 +157,17 @@ export interface SubmissionTag {
   tag_id: string;
   created_at: string;
   tag?: Tag;
+}
+
+// Activities
+export type ActivityType = 'stage_change' | 'note' | 'manual' | 'tag_added' | 'tag_removed' | 'created';
+
+export interface Activity {
+  id: string;
+  submission_id: string;
+  type: ActivityType;
+  description: string;
+  metadata: Record<string, unknown>;
+  created_by?: string;
+  created_at: string;
 }

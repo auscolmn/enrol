@@ -15,6 +15,7 @@ import {
 import { formatDistanceToNow, format } from 'date-fns';
 import { X, Mail, Phone, Calendar, Clock, Save, FileText, Tag } from 'lucide-react';
 import { TagManager } from '@/components/tags/tag-manager';
+import { ActivityLog, logActivity } from '@/components/activities/activity-log';
 import type { PipelineStage, Submission, StageHistory, FormField, Tag as TagType } from '@/types';
 
 interface ApplicantModalProps {
@@ -29,25 +30,15 @@ interface ApplicantModalProps {
 export function ApplicantModal({ submission, stages, formFields, workspaceId, onClose, onUpdate }: ApplicantModalProps) {
   const [notes, setNotes] = useState(submission.notes || '');
   const [saving, setSaving] = useState(false);
-  const [history, setHistory] = useState<StageHistory[]>([]);
   const [tags, setTags] = useState<TagType[]>([]);
+  const [activityKey, setActivityKey] = useState(0); // For refreshing activity log
   const supabase = createClient();
 
   const currentStage = stages.find(s => s.id === submission.stage_id);
 
-  // Fetch stage history and tags
+  // Fetch tags
   useEffect(() => {
-    async function fetchData() {
-      // Fetch history
-      const { data: historyData } = await supabase
-        .from('stage_history')
-        .select('*, from_stage:pipeline_stages!from_stage_id(name, color), to_stage:pipeline_stages!to_stage_id(name, color)')
-        .eq('submission_id', submission.id)
-        .order('changed_at', { ascending: false });
-      
-      if (historyData) setHistory(historyData);
-
-      // Fetch tags
+    async function fetchTags() {
       const { data: tagData } = await supabase
         .from('submission_tags')
         .select('*, tag:tags(*)')
@@ -57,8 +48,11 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
         setTags(tagData.map(st => st.tag).filter(Boolean) as TagType[]);
       }
     }
-    fetchData();
+    fetchTags();
   }, [submission.id, supabase]);
+  
+  // Refresh activity log
+  const refreshActivity = () => setActivityKey(k => k + 1);
 
   const saveNotes = async () => {
     setSaving(true);
@@ -69,7 +63,17 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
         .eq('id', submission.id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity(
+        supabase,
+        submission.id,
+        'note',
+        'Updated notes'
+      );
+
       onUpdate({ ...submission, notes });
+      refreshActivity();
     } catch (err) {
       console.error('Failed to save notes:', err);
     } finally {
@@ -79,6 +83,9 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
 
   const changeStage = async (stageId: string) => {
     if (stageId === submission.stage_id) return;
+
+    const fromStage = stages.find(s => s.id === submission.stage_id);
+    const toStage = stages.find(s => s.id === stageId);
 
     try {
       const { error } = await supabase
@@ -95,16 +102,17 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
         to_stage_id: stageId,
       });
 
+      // Log activity
+      await logActivity(
+        supabase,
+        submission.id,
+        'stage_change',
+        `Moved from ${fromStage?.name || 'Unknown'} to ${toStage?.name || 'Unknown'}`,
+        { from_stage_id: submission.stage_id, to_stage_id: stageId }
+      );
+
       onUpdate({ ...submission, stage_id: stageId });
-      
-      // Refresh history
-      const { data } = await supabase
-        .from('stage_history')
-        .select('*, from_stage:pipeline_stages!from_stage_id(name, color), to_stage:pipeline_stages!to_stage_id(name, color)')
-        .eq('submission_id', submission.id)
-        .order('changed_at', { ascending: false });
-      
-      if (data) setHistory(data);
+      refreshActivity();
     } catch (err) {
       console.error('Failed to change stage:', err);
     }
@@ -242,34 +250,14 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
             </div>
           </div>
 
-          {/* History */}
-          {history.length > 0 && (
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                History
-              </label>
-              <div className="space-y-2">
-                {history.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="text-gray-400">
-                      {format(new Date(item.changed_at), 'MMM d, h:mm a')}
-                    </span>
-                    <span>→</span>
-                    <Badge 
-                      variant="outline" 
-                      style={{ 
-                        borderColor: (item.to_stage as any)?.color,
-                        color: (item.to_stage as any)?.color,
-                      }}
-                    >
-                      {(item.to_stage as any)?.name || 'Unknown'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Activity Log */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Activity
+            </label>
+            <ActivityLog key={activityKey} submissionId={submission.id} />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

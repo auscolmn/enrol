@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TagBadge } from './tag-badge';
+import { logActivity } from '@/components/activities/activity-log';
 import { Plus, Tag as TagIcon, Check } from 'lucide-react';
 import type { Tag } from '@/types';
 
@@ -62,6 +63,9 @@ export function TagManager({ submissionId, workspaceId, initialTags = [], onTags
         .insert({ submission_id: submissionId, tag_id: tag.id });
       
       if (error) throw error;
+
+      // Log activity
+      await logActivity(supabase, submissionId, 'tag_added', `Added tag: ${tag.name}`, { tag_id: tag.id, tag_name: tag.name });
       
       const newTags = [...assignedTags, tag];
       setAssignedTags(newTags);
@@ -72,6 +76,7 @@ export function TagManager({ submissionId, workspaceId, initialTags = [], onTags
   };
 
   const removeTag = async (tagId: string) => {
+    const tag = assignedTags.find(t => t.id === tagId);
     try {
       const { error } = await supabase
         .from('submission_tags')
@@ -80,6 +85,11 @@ export function TagManager({ submissionId, workspaceId, initialTags = [], onTags
         .eq('tag_id', tagId);
       
       if (error) throw error;
+
+      // Log activity
+      if (tag) {
+        await logActivity(supabase, submissionId, 'tag_removed', `Removed tag: ${tag.name}`, { tag_id: tagId, tag_name: tag.name });
+      }
       
       const newTags = assignedTags.filter(t => t.id !== tagId);
       setAssignedTags(newTags);
