@@ -15,8 +15,8 @@ interface PublicFormProps {
 }
 
 const DEFAULT_BRANDING: FormBranding = {
-  primaryColor: '#3B82F6',
-  backgroundColor: '#F9FAFB',
+  primaryColor: '#6366F1', // Indigo - matches new design system
+  backgroundColor: '#F5F3FF', // Soft Purple
   cardBackground: '#FFFFFF',
   fontFamily: 'inter',
   borderRadius: 'rounded',

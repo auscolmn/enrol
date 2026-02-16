@@ -49,37 +49,47 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  
+  /* Enrol Studio Design System - Flat Design + Vibrant */
+  /* Primary: Indigo #6366F1 | Secondary: Light Indigo #818CF8 */
+  /* CTA: Emerald #10B981 | Background: Soft Purple #F5F3FF */
+  /* Text: Dark Indigo #1E1B4B */
+  
+  --background: oklch(0.965 0.014 290); /* Soft Purple #F5F3FF */
+  --foreground: oklch(0.188 0.084 283); /* Dark Indigo #1E1B4B */
+  --card: oklch(1 0 0); /* White */
+  --card-foreground: oklch(0.188 0.084 283);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.188 0.084 283);
+  --primary: oklch(0.541 0.232 275); /* Indigo #6366F1 */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.634 0.189 277); /* Light Indigo #818CF8 */
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.945 0.02 290); /* Slightly darker soft purple */
+  --muted-foreground: oklch(0.45 0.05 283);
+  --accent: oklch(0.696 0.17 162); /* Emerald #10B981 */
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
+  --border: oklch(0.9 0.025 290); /* Soft purple border */
+  --input: oklch(0.92 0.02 290);
+  --ring: oklch(0.541 0.232 275); /* Indigo ring */
+  --chart-1: oklch(0.541 0.232 275); /* Indigo */
+  --chart-2: oklch(0.696 0.17 162); /* Emerald */
+  --chart-3: oklch(0.634 0.189 277); /* Light Indigo */
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(1 0 0); /* White sidebar */
+  --sidebar-foreground: oklch(0.188 0.084 283);
+  --sidebar-primary: oklch(0.541 0.232 275); /* Indigo */
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.945 0.025 290); /* Soft purple accent */
+  --sidebar-accent-foreground: oklch(0.188 0.084 283);
+  --sidebar-border: oklch(0.92 0.02 290);
+  --sidebar-ring: oklch(0.541 0.232 275);
+  
+  /* CTA specific */
+  --cta: oklch(0.696 0.17 162); /* Emerald #10B981 */
+  --cta-foreground: oklch(0.985 0 0);
 }
 
 .dark {
@@ -119,10 +129,57 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    @apply bg-background text-foreground;
+  }
+}
+
+/* Micro-interactions - Flat Design Style */
+@layer utilities {
+  /* Button hover: subtle scale + color shift */
+  .btn-micro {
+    @apply transition-all duration-200 ease-out;
+  }
+  .btn-micro:hover {
+    transform: scale(1.02);
+    filter: brightness(1.05);
+  }
+  .btn-micro:active {
+    transform: scale(0.98);
+  }
+  
+  /* Card hover: gentle lift */
+  .card-micro {
+    @apply transition-all duration-200 ease-out;
+  }
+  .card-micro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+  }
+  
+  /* Input focus: smooth border transition */
+  .input-micro {
+    @apply transition-all duration-200 ease-out;
+  }
+  .input-micro:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px oklch(0.541 0.232 275 / 0.15);
+  }
+  
+  /* Feature icon hover */
+  .feature-icon {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .feature-icon:hover {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  
+  /* Nav link hover */
+  .nav-link-micro {
+    @apply transition-all duration-150 ease-out;
+  }
+  .nav-link-micro:hover {
+    background-color: oklch(0.945 0.025 290);
   }
 }
