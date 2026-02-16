@@ -133,6 +133,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Plus Jakarta Sans for headings - distinctive typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  }
 }
 
 /* Micro-interactions - Flat Design Style */
