@@ -13,28 +13,52 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatDistanceToNow, format } from 'date-fns';
-import { X, Mail, Phone, Calendar, Clock, Save, FileText, Tag } from 'lucide-react';
+import { X, Mail, Phone, Calendar, Clock, Save, FileText, Tag, GraduationCap } from 'lucide-react';
 import { TagManager } from '@/components/tags/tag-manager';
 import { ActivityLog, logActivity } from '@/components/activities/activity-log';
-import type { PipelineStage, Submission, StageHistory, FormField, Tag as TagType } from '@/types';
+import { LearnStudioLink } from '@/components/learnstudio-button';
+import type { PipelineStage, Submission, StageHistory, FormField, Tag as TagType, LearnStudioCourse } from '@/types';
 
 interface ApplicantModalProps {
   submission: Submission;
   stages: PipelineStage[];
   formFields: FormField[];
   workspaceId: string;
+  learnstudioCourseId?: string | null;
   onClose: () => void;
   onUpdate: (submission: Submission) => void;
 }
 
-export function ApplicantModal({ submission, stages, formFields, workspaceId, onClose, onUpdate }: ApplicantModalProps) {
+export function ApplicantModal({ submission, stages, formFields, workspaceId, learnstudioCourseId, onClose, onUpdate }: ApplicantModalProps) {
   const [notes, setNotes] = useState(submission.notes || '');
   const [saving, setSaving] = useState(false);
   const [tags, setTags] = useState<TagType[]>([]);
   const [activityKey, setActivityKey] = useState(0); // For refreshing activity log
+  const [courseName, setCourseName] = useState<string | null>(null);
   const supabase = createClient();
 
   const currentStage = stages.find(s => s.id === submission.stage_id);
+  const isEnrolled = currentStage?.slug === 'enrolled';
+  const hasLearnStudioAccess = isEnrolled && learnstudioCourseId != null;
+
+  // Fetch course name if LearnStudio is configured
+  useEffect(() => {
+    async function fetchCourseName() {
+      if (!learnstudioCourseId) return;
+      
+      const { data } = await supabase
+        .from('courses')
+        .select('title')
+        .eq('id', learnstudioCourseId)
+        .single();
+      
+      if (data) {
+        setCourseName(data.title);
+      }
+    }
+    
+    fetchCourseName();
+  }, [learnstudioCourseId, supabase]);
 
   // Fetch tags
   useEffect(() => {
@@ -176,6 +200,26 @@ export function ApplicantModal({ submission, stages, formFields, workspaceId, on
               ))}
             </div>
           </div>
+
+          {/* LearnStudio Access */}
+          {hasLearnStudioAccess && (
+            <div className="p-4 bg-[#22C55E]/5 border border-[#22C55E]/20 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-[#22C55E]/10 rounded-md">
+                    <GraduationCap className="w-4 h-4 text-[#22C55E]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">LearnStudio Access</p>
+                    {courseName && (
+                      <p className="text-xs text-gray-500">Enrolled in: {courseName}</p>
+                    )}
+                  </div>
+                </div>
+                <LearnStudioLink />
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           <div>

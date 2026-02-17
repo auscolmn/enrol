@@ -76,6 +76,18 @@ export interface Form {
   published: boolean;
   created_at: string;
   updated_at: string;
+  // LearnStudio integration
+  learnstudio_course_id?: string | null;
+  learnstudio_send_welcome_email?: boolean;
+}
+
+// LearnStudio Course (from shared Supabase)
+export interface LearnStudioCourse {
+  id: string;
+  org_id: string;
+  title: string;
+  slug: string;
+  status: 'draft' | 'published' | 'archived';
 }
 
 export interface FormBranding {

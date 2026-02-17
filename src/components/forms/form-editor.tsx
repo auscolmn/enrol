@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -37,9 +37,10 @@ import {
   Palette,
   Settings,
   Layers,
-  Crown
+  Crown,
+  GraduationCap
 } from 'lucide-react';
-import type { Form, FormField, FieldType, FormBranding, FormSettings } from '@/types';
+import type { Form, FormField, FieldType, FormBranding, FormSettings, LearnStudioCourse } from '@/types';
 
 const FIELD_TYPES: { type: FieldType; label: string; icon: React.ReactNode }[] = [
   { type: 'text', label: 'Short Text', icon: <Type className="w-4 h-4" /> },
@@ -88,8 +89,45 @@ export function FormEditor({ initialForm }: FormEditorProps) {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState('fields');
+  
+  // LearnStudio integration state
+  const [learnstudioCourseId, setLearnstudioCourseId] = useState<string | null>(
+    initialForm.learnstudio_course_id || null
+  );
+  const [learnstudioSendEmail, setLearnstudioSendEmail] = useState(
+    initialForm.learnstudio_send_welcome_email || false
+  );
+  const [availableCourses, setAvailableCourses] = useState<LearnStudioCourse[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  
   const router = useRouter();
   const supabase = createClient();
+
+  // Fetch LearnStudio courses on mount
+  useEffect(() => {
+    async function fetchCourses() {
+      setCoursesLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('id, org_id, title, slug, status')
+          .eq('status', 'published')
+          .order('title');
+        
+        if (error) {
+          console.error('Failed to fetch courses:', error);
+        } else {
+          setAvailableCourses(data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      } finally {
+        setCoursesLoading(false);
+      }
+    }
+    
+    fetchCourses();
+  }, [supabase]);
 
   const publicUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/f/${form.slug}`
@@ -147,13 +185,22 @@ export function FormEditor({ initialForm }: FormEditorProps) {
           fields,
           settings: updatedSettings,
           published: publish ? true : form.published,
+          learnstudio_course_id: learnstudioCourseId,
+          learnstudio_send_welcome_email: learnstudioSendEmail,
           updated_at: new Date().toISOString(),
         })
         .eq('id', form.id);
 
       if (error) throw error;
       
-      setForm({ ...form, fields, settings: updatedSettings, published: publish ? true : form.published });
+      setForm({ 
+        ...form, 
+        fields, 
+        settings: updatedSettings, 
+        published: publish ? true : form.published,
+        learnstudio_course_id: learnstudioCourseId,
+        learnstudio_send_welcome_email: learnstudioSendEmail,
+      });
       setSettings(updatedSettings);
       router.refresh();
     } catch (err) {
@@ -686,6 +733,76 @@ export function FormEditor({ initialForm }: FormEditorProps) {
                     placeholder="https://example.com/thank-you"
                   />
                   <p className="text-xs text-gray-400">Redirect after submission (optional)</p>
+                </div>
+
+                {/* LearnStudio Integration Section */}
+                <div className="pt-4 border-t border-[#22C55E]/20">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-1.5 bg-[#22C55E]/10 rounded-md">
+                      <GraduationCap className="w-4 h-4 text-[#22C55E]" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900">LearnStudio Integration</h3>
+                  </div>
+                  
+                  {/* Course Selector */}
+                  <div className="space-y-2 mb-4">
+                    <Label className="text-xs font-medium text-gray-500">
+                      Grant access to course
+                    </Label>
+                    <Select
+                      value={learnstudioCourseId || 'none'}
+                      onValueChange={(value) => setLearnstudioCourseId(value === 'none' ? null : value)}
+                      disabled={coursesLoading}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={coursesLoading ? "Loading courses..." : "Select a course"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          <span className="text-gray-500">No course access</span>
+                        </SelectItem>
+                        {availableCourses.map((course) => (
+                          <SelectItem key={course.id} value={course.id}>
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="w-3.5 h-3.5 text-[#22C55E]" />
+                              {course.title}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-400">
+                      When applicants reach "Enrolled" stage, they'll get access to this course
+                    </p>
+                  </div>
+
+                  {/* Welcome Email Toggle */}
+                  {learnstudioCourseId && (
+                    <div className="flex items-start gap-3 p-3 bg-[#22C55E]/5 rounded-lg border border-[#22C55E]/20">
+                      <input
+                        type="checkbox"
+                        id="sendWelcomeEmail"
+                        checked={learnstudioSendEmail}
+                        onChange={(e) => setLearnstudioSendEmail(e.target.checked)}
+                        className="mt-0.5 rounded border-[#22C55E] text-[#22C55E] focus:ring-[#22C55E]"
+                      />
+                      <div>
+                        <label htmlFor="sendWelcomeEmail" className="text-sm font-medium text-gray-900 cursor-pointer">
+                          Send welcome email with course link
+                        </label>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Automatically email enrollees their course access details
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No courses available message */}
+                  {!coursesLoading && availableCourses.length === 0 && (
+                    <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-md">
+                      No published courses found. Create a course in LearnStudio first.
+                    </p>
+                  )}
                 </div>
               </div>
             </TabsContent>

@@ -10,9 +10,12 @@ interface StageColumnProps {
   stage: PipelineStage;
   submissions: Submission[];
   onCardClick: (submission: Submission) => void;
+  formHasLearnStudio?: boolean;
 }
 
-export function StageColumn({ stage, submissions, onCardClick }: StageColumnProps) {
+export function StageColumn({ stage, submissions, onCardClick, formHasLearnStudio }: StageColumnProps) {
+  // Check if this is the "Enrolled" stage
+  const isEnrolledStage = stage.slug === 'enrolled';
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
   });
@@ -44,6 +47,8 @@ export function StageColumn({ stage, submissions, onCardClick }: StageColumnProp
               key={submission.id}
               submission={submission}
               onClick={() => onCardClick(submission)}
+              isEnrolled={isEnrolledStage}
+              hasLearnStudioAccess={formHasLearnStudio}
             />
           ))
         ) : (

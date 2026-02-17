@@ -4,16 +4,18 @@ import { useDraggable } from '@dnd-kit/core';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { GripVertical, Mail, StickyNote } from 'lucide-react';
+import { GripVertical, Mail, StickyNote, GraduationCap } from 'lucide-react';
 import type { Submission } from '@/types';
 
 interface ApplicantCardProps {
   submission: Submission;
   onClick?: () => void;
   isDragging?: boolean;
+  isEnrolled?: boolean;
+  hasLearnStudioAccess?: boolean;
 }
 
-export function ApplicantCard({ submission, onClick, isDragging }: ApplicantCardProps) {
+export function ApplicantCard({ submission, onClick, isDragging, isEnrolled, hasLearnStudioAccess }: ApplicantCardProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: submission.id,
   });
@@ -69,6 +71,14 @@ export function ApplicantCard({ submission, onClick, isDragging }: ApplicantCard
             <div className="flex items-center gap-1 text-xs text-amber-600 mt-2">
               <StickyNote className="w-3 h-3" />
               <span>Has notes</span>
+            </div>
+          )}
+
+          {/* LearnStudio access indicator */}
+          {isEnrolled && hasLearnStudioAccess && (
+            <div className="flex items-center gap-1 text-xs text-[#22C55E] mt-2">
+              <GraduationCap className="w-3 h-3" />
+              <span>Course access</span>
             </div>
           )}
         </div>

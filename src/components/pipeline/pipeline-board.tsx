@@ -25,7 +25,7 @@ import type { PipelineStage, Submission, FormField } from '@/types';
 interface PipelineBoardProps {
   stages: PipelineStage[];
   submissions: Submission[];
-  forms: { id: string; title: string; fields: FormField[] }[];
+  forms: { id: string; title: string; fields: FormField[]; learnstudio_course_id?: string | null }[];
   workspaceId: string;
 }
 
@@ -160,12 +160,16 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms, 
           <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:snap-none">
           {stages.map((stage) => {
             const stageSubmissions = submissions.filter(s => s.stage_id === stage.id);
+            // Find the form for this stage and check if it has LearnStudio integration
+            const stageForm = forms.find(f => stageSubmissions.some(s => s.form_id === f.id));
+            const hasLearnStudio = stageForm?.learnstudio_course_id != null;
             return (
               <StageColumn
                 key={stage.id}
                 stage={stage}
                 submissions={stageSubmissions}
                 onCardClick={setSelectedSubmission}
+                formHasLearnStudio={hasLearnStudio}
               />
             );
           })}
@@ -186,6 +190,7 @@ export function PipelineBoard({ stages, submissions: initialSubmissions, forms, 
           stages={stages}
           formFields={forms.find(f => f.id === selectedSubmission.form_id)?.fields || []}
           workspaceId={workspaceId}
+          learnstudioCourseId={forms.find(f => f.id === selectedSubmission.form_id)?.learnstudio_course_id}
           onClose={() => setSelectedSubmission(null)}
           onUpdate={(updated) => {
             setSubmissions(submissions.map(s => s.id === updated.id ? updated : s));

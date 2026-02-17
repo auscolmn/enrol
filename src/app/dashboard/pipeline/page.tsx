@@ -17,7 +17,7 @@ export default async function PipelinePage() {
   // Get all forms for this workspace (including fields for label lookup)
   const { data: forms } = await supabase
     .from('forms')
-    .select('id, title, fields')
+    .select('id, title, fields, learnstudio_course_id')
     .eq('workspace_id', workspace?.id);
 
   // Get all pipeline stages for these forms
