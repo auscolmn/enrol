@@ -132,11 +132,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
   }
   
-  /* Plus Jakarta Sans for headings - distinctive typography */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  /* Serif typography for editorial headings */
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 400;
   }
 }
 
